@@ -14,14 +14,10 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Extract Project ZIP
         run: |
           mkdir -p native_project
           unzip -o *.zip -d native_project || true
-          # Memindahkan file ke root jika terbungkus folder ekstra
           if [ -d native_project/app ]; then
             cp -r native_project/* .
           else
@@ -32,10 +28,13 @@ jobs:
         run: chmod +x gradlew || true
 
       - name: Build with Gradle
-        run: ./gradlew assembleDebug || gradle assembleDebug
+        run: |
+          ./gradlew assembleDebug --no-daemon || gradle assembleDebug --no-daemon
 
       - name: Upload APK Result
         uses: actions/upload-artifact@v4
         with:
           name: HDREngine-Native-APK
-          path: app/build/outputs/apk/debug/*.apk
+          path: |
+            **/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/debug/*.apk
